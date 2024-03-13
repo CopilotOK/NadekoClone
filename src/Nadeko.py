@@ -2,7 +2,6 @@
 import discord
 from discord.ext import commands
 from random import choice, randint
-import asyncio
 from User import User
 from Card import cards
 from PIL import Image
