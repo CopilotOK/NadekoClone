@@ -6,10 +6,11 @@ import asyncio
 from User import User
 from Card import cards
 from PIL import Image
-from os import remove
-
+from os import remove,getenv
+from dotenv import load_dotenv, dotenv_values
+load_dotenv()
 # bot token
-TOKEN = "nah bro"
+TOKEN = "MTIxMzE5MTUxNzE1MDEyMjAyNQ.GtRL-p.PQ1X0De3MC947L4BeNhwK1jSJKfaTA-buMpdU4"
 # to change custom status like nadeko
 presence = [".trivia --pokemon",".draw 5",".h for help",".h greet", ".h aar",
             ".crypto btc", ".ani steins;gate"]
@@ -54,19 +55,22 @@ async def setnext(ctx):
          cheaterNumber = msg
          await ctx.send(cheaterNumber)
 
+
 @bot.command()
 async def flip(ctx):
    y = randint(1,2)
    if y==1:
       embyd = discord.Embed(description="Flipped **Head**",color=discord.Colour.from_rgb(113, 205, 64))
       embyd.set_author(name=ctx.author.name+"#0000", icon_url=ctx.author.avatar)
-      embyd.set_image(url="https://cdn.discordapp.com/attachments/1213193280410488897/1213739243856199680/coins.png?ex=65f691c1&is=65e41cc1&hm=aa8fee838b736c3034c739ca8014130578a7e6995e1323ac2bff143ba48888c1&")
+      embyd.set_image(url="https://cdn.discordapp.com/attachments/1214980110462099556/1214983478542868480/coins.png?ex=65fb188a&is=65e8a38a&hm=99e872e1808a0bb84dbeb27a40c0487e439cd33f0cd95724a87610000132ec4e&")
       await ctx.send(embed=embyd)
+      print(f"logs:{ctx.author.name} invoked .flip")
    if y==2:
       embyd = discord.Embed(description="Flipped **Tail**",color=discord.Colour.from_rgb(113, 205, 64))
       embyd.set_author(name=ctx.author.name+"#0000", icon_url=ctx.author.avatar)
-      embyd.set_image(url="https://cdn.discordapp.com/attachments/1213193280410488897/1213739224986288190/coins.png?ex=65f691bd&is=65e41cbd&hm=6a3071d8bac05c296a6561626f6a325840ce4ca5ea9b35833aff11e7ce33347f&")
+      embyd.set_image(url="https://cdn.discordapp.com/attachments/1214980110462099556/1214983455440379975/coins.png?ex=65fb1885&is=65e8a385&hm=18bc2d8bb300e8e81f63e0dd9859526c8f4e8984c2d443ca9b573e3db86ac5dd&")
       await ctx.send(embed=embyd)
+      print(f"logs:{ctx.author.name} invoked .flip")
 
 # deck reshuffle
 @bot.command()
@@ -74,9 +78,10 @@ async def dsh(ctx):
    global dealer
    dealer = User(ctx.author.name)
    dealer.deck=cards.copy()
-   embqd = discord.Embed(description="**"+ctx.author.display_name+"#0000**"+" Deck reshuffled.",
+   embqd = discord.Embed(description="**"+ctx.author.name+"#0000**"+" Deck reshuffled.",
                          color=discord.Colour.from_rgb(113, 205, 64))
    await ctx.send(embed=embqd)
+   print(f"logs:{ctx.author.name} invoked .dsh")
 
 # draw command like nadeko
 @bot.command()
@@ -97,15 +102,21 @@ async def draw(ctx):
       if cheaterNumber==0:
          if (isinstance(dealer,User))==False:
             dealer = User(ctx.author.name)
-         rolledcard = choice(cards)
+            rolledcard = choice(cards)
+         else:
+            rolledcard = choice(dealer.deck)
          dealer.power_inhand += rolledcard.power
          dealer.deck.remove(rolledcard)
          deckleft = len(dealer.deck)
          embeddraw = discord.Embed(description=f"**{deckleft}** cards left in the deck",
                                  color=discord.Colour.from_rgb(113, 205, 64))
-         embeddraw.set_image(url=rolledcard.image)
+         file = discord.File(f"src\\cardsimg\\{rolledcard.name}.jpg",filename=f"{rolledcard.name}.jpg")
+         embeddraw.set_image(url=f"attachment://{rolledcard.name}.jpg")
          embeddraw.set_author(name=ctx.author.name+"#0000", icon_url=ctx.author.avatar)
-         await ctx.send(embed=embeddraw)
+         await ctx.send(embed=embeddraw, file=file)
+         print(f"logs:{ctx.author.name} invoked .draw")
+         
+      
       else:
          if (isinstance(dealer,User))==False:
             dealer = User(ctx.author.name)
@@ -114,15 +125,20 @@ async def draw(ctx):
             if i.power==cheaterNumber:
                possiblecards.append(i)
          rc = choice(possiblecards)
+      
+         
          dealer.power_inhand=rc.power
          dealer.deck.remove(rc)
          deckleft = len(dealer.deck)
          embeddraw = discord.Embed(description=f"**{deckleft}** cards left in the deck",
                                  color=discord.Colour.from_rgb(113, 205, 64))
-         embeddraw.set_image(url=rc.image)
          embeddraw.set_author(name=ctx.author.name+"#0000", icon_url=ctx.author.avatar)
+         file = discord.File(f"src\\cardsimg\\{rc.name}.jpg",filename=f"{rc.name}.jpg")
+         embeddraw.set_image(url=f"attachment://{rc.name}.jpg")
+         await ctx.send(embed=embeddraw, file=file)
          cheaterNumber=0
-         await ctx.send(embed=embeddraw)
+
+         print(f"logs:{ctx.author.name} invoked .draw")
 
 
 
@@ -131,13 +147,18 @@ async def draw(ctx):
    elif msg==2:
       if (isinstance(dealer,User))==False:
          dealer = User(ctx.author.name)
-      rolledcard1 = choice(cards)
-      dealer.deck.remove(rolledcard1)
-      rolledcard2 = choice(cards)
-      dealer.deck.remove(rolledcard2)
+         rolledcard1 = choice(cards)
+         rolledcard2 = choice(cards)
+      else:
+         rolledcard1 = choice(dealer.deck)
+         dealer.deck.remove(rolledcard1)
+         rolledcard2 = choice(dealer.deck)
+         dealer.deck.remove(rolledcard2)
+      
+
       deck_left = len(dealer.deck)
-      img1 = Image.open(f"src/cardsimg/{rolledcard1.name}.jpg")
-      img2 = Image.open(f"src/cardsimg/{rolledcard2.name}.jpg")
+      img1 = Image.open(f"src\\cardsimg\\{rolledcard1.name}.jpg")
+      img2 = Image.open(f"src\\cardsimg\\{rolledcard2.name}.jpg")
       WIDTH = img1.size[0] + img2.size[0]
       HEIGHT = img1.size[1]
       img3 = Image.new('RGB',(WIDTH,HEIGHT))
@@ -149,10 +170,10 @@ async def draw(ctx):
       file = discord.File("temp.jpg",filename="temp.jpg")
       embed_2.add_field(name="Cards",value="2")
       embed_2.set_image(url="attachment://temp.jpg")
-      print(len(cards))
       embed_2.set_author(name=ctx.author.name+"#0000", icon_url=ctx.author.avatar)
       await ctx.send(embed=embed_2, file=file)
       file.close()
+      print(f"logs:{ctx.author.name} invoked .draw 2")
       remove("temp.jpg")
       
 
@@ -166,7 +187,7 @@ async def draw(ctx):
                             `.draw 5`\n''',
                             color=discord.Colour.from_rgb(236, 44, 28))
       embed.set_footer(text="Admin may disable verbose errors via `.ve` command")
-      
+      print(f"logs: user {ctx.author.name} invoked error by .draw")
 
       await ctx.send(embed=embed)
    
@@ -175,7 +196,8 @@ async def draw(ctx):
 # set the presence on ready 
 @bot.event
 async def on_ready(): 
+   print("logs: bot is ready;")
    await bot.change_presence(activity=discord.Game(choice(presence)))
 
 # :)
-bot.run(TOKEN)
+bot.run(getenv("TOKEN"))
